@@ -1,0 +1,1318 @@
+/* ==========================================================================
+   GRID-UP ELECTRICITY: INDUSTRIAL TELEMETRY DESIGN SYSTEM
+   High-Craftsmanship Anti-Slop Architecture
+   Typography: Space Grotesk (Display) + JetBrains Mono (Data) + Plus Jakarta Sans (UI)
+   Palette: Obsidian (#08090D), Carbon (#0E121A), Electric Cyan (#00E5FF), Cadmium Amber (#FFB800)
+   ========================================================================== */
+
+:root {
+  /* Surface Tokens */
+  --bg-obsidian: #08090d;
+  --bg-surface: #0e121a;
+  --bg-deck: #141a24;
+  --bg-deck-elevated: #1a2230;
+  --bg-hover: #1f293d;
+
+  /* Hairlines & Structural Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-deck: #222b3d;
+  --border-strong: #2e3a52;
+
+  /* Signal Accents */
+  --signal-cyan: #00e5ff;
+  --signal-cyan-dim: rgba(0, 229, 255, 0.12);
+  --signal-cyan-border: rgba(0, 229, 255, 0.35);
+
+  --signal-amber: #ffb800;
+  --signal-amber-dim: rgba(255, 184, 0, 0.12);
+  --signal-amber-border: rgba(255, 184, 0, 0.35);
+
+  --signal-emerald: #10b981;
+  --signal-emerald-dim: rgba(16, 185, 129, 0.14);
+
+  --signal-tangerine: #fb923c;
+  --signal-tangerine-dim: rgba(251, 146, 60, 0.14);
+
+  --signal-rose: #f43f5e;
+  --signal-rose-dim: rgba(244, 63, 94, 0.14);
+
+  /* Typography Colors */
+  --text-white: #ffffff;
+  --text-silver: #e2e8f0;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Font Families */
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Animation Timings (Strictly <= 200ms) */
+  --transition-fast: 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reset & Baseline */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+  background-color: var(--bg-obsidian);
+  color: var(--text-white);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-obsidian);
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  overflow-x: hidden;
+}
+
+/* Tabular Numbers for Data Alignment */
+.tabular, .telemetry-val, .metric-value, .cell-primary-value, .cell-secondary-value, .gauge-val, .telemetry-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom Engineered Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-obsidian);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-deck);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--signal-cyan);
+}
+
+/* Focus Visible Accessibility */
+:focus-visible {
+  outline: 2px solid var(--signal-cyan);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   HEADER: INDUSTRIAL DISPATCH COMMAND BAR
+   ========================================================================== */
+.app-header {
+  height: 58px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-deck);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 0 rgba(0, 229, 255, 0.1);
+}
+
+.header-brand-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.station-mark {
+  width: 34px;
+  height: 34px;
+  background: var(--bg-deck);
+  border: 1px solid var(--signal-cyan);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--signal-cyan);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.brand-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.coord-divider {
+  color: var(--text-muted);
+}
+
+.region-tag {
+  color: var(--signal-cyan);
+}
+
+.app-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-white);
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.title-accent {
+  color: var(--signal-amber);
+  font-weight: 700;
+}
+
+.header-telemetry-array {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.telemetry-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+.telemetry-key {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.6px;
+}
+
+.telemetry-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.telemetry-badge.active-model {
+  border-color: var(--signal-amber-border);
+  background: var(--signal-amber-dim);
+}
+
+.telemetry-badge.active-model .telemetry-key {
+  color: var(--signal-amber);
+}
+
+.telemetry-badge.active-model .telemetry-val {
+  color: var(--signal-amber);
+}
+
+/* ==========================================================================
+   APP WORKSPACE LAYOUT
+   ========================================================================== */
+.app-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  min-height: calc(100vh - 58px);
+  flex: 1;
+}
+
+/* ==========================================================================
+   SIDEBAR DOCK (LEFT)
+   ========================================================================== */
+.sidebar-dock {
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-deck);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 58px);
+  position: sticky;
+  top: 58px;
+  overflow: hidden;
+}
+
+.dock-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-panel {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-deck);
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 48%;
+  background: var(--bg-surface);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.panel-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--signal-cyan);
+  letter-spacing: 0.8px;
+}
+
+.panel-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.input-container, .select-container {
+  position: relative;
+  width: 100%;
+}
+
+input[type="text"], select {
+  width: 100%;
+  background: var(--bg-deck);
+  color: var(--text-white);
+  border: 1px solid var(--border-deck);
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  outline: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+input[type="text"]:focus, select:focus {
+  border-color: var(--signal-cyan);
+  background: var(--bg-deck-elevated);
+}
+
+input[type="text"]::placeholder {
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 11px;
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+select option {
+  background: var(--bg-surface);
+  color: var(--text-white);
+}
+
+.geo-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Status Rocker Segmented Switch */
+.status-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  background: var(--bg-obsidian);
+  padding: 3px;
+  border-radius: 4px;
+  border: 1px solid var(--border-deck);
+}
+
+.filter-btn {
+  background: transparent;
+  color: var(--text-dim);
+  border: none;
+  padding: 5px 6px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  text-align: center;
+}
+
+.filter-btn:hover {
+  color: var(--text-white);
+  background: var(--bg-hover);
+}
+
+.filter-btn.active {
+  background: var(--signal-cyan);
+  color: var(--bg-obsidian);
+  font-weight: 800;
+  box-shadow: 0 1px 4px rgba(0, 229, 255, 0.3);
+}
+
+.filter-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Registry Section */
+.registry-panel {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.registry-toolbar {
+  padding: 8px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-deck);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.registry-count-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.count-display {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.registry-nav-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.tactile-btn {
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  color: var(--text-dim);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.tactile-btn:hover {
+  border-color: var(--signal-cyan);
+  color: var(--signal-cyan);
+}
+
+.tactile-btn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.random-btn {
+  background: var(--signal-amber-dim);
+  border-color: var(--signal-amber-border);
+  color: var(--signal-amber);
+}
+
+.random-btn:hover {
+  border-color: var(--signal-amber);
+  color: #fff;
+  background: var(--signal-amber);
+}
+
+.random-btn:hover .btn-icon {
+  color: #000;
+}
+
+/* Transformer Scroll Stream */
+.trafo-scroll-registry {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trafo-item {
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  border-left: 3px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trafo-item:hover {
+  border-color: var(--signal-cyan-border);
+  border-left-color: var(--signal-cyan);
+  background: var(--bg-hover);
+  transform: translateX(3px);
+}
+
+.trafo-item.active {
+  background: var(--bg-deck-elevated);
+  border-color: var(--signal-cyan);
+  border-left-color: var(--signal-cyan);
+  border-left-width: 4px;
+  box-shadow: inset 0 0 12px rgba(0, 229, 255, 0.08);
+}
+
+.trafo-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trafo-item-id {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-white);
+  letter-spacing: 0.5px;
+}
+
+.trafo-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.4px;
+}
+
+.trafo-badge.seen {
+  background: var(--signal-emerald-dim);
+  color: var(--signal-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.trafo-badge.cold {
+  background: var(--signal-tangerine-dim);
+  color: var(--signal-tangerine);
+  border: 1px solid rgba(251, 146, 60, 0.4);
+}
+
+.trafo-item-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 28px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--signal-cyan);
+}
+
+/* ==========================================================================
+   MAIN VIEWPORT (RIGHT)
+   ========================================================================== */
+.main-viewport {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+/* ==========================================================================
+   SECTION A: ASYMMETRIC COMMAND DOSSIER (HERO)
+   ========================================================================== */
+.command-dossier {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-deck);
+  border-top: 2px solid var(--signal-cyan);
+  border-radius: 6px;
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  position: relative;
+}
+
+.dossier-anchor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-right: 1px solid var(--border-subtle);
+  padding-right: 20px;
+}
+
+.dossier-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-ribbon {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--signal-cyan);
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.dossier-tag {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.trafo-id-display {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-white);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.dossier-route-path {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bg-deck);
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-deck);
+  flex-wrap: wrap;
+}
+
+.route-node {
+  font-weight: 600;
+}
+
+.route-node.highlight {
+  color: var(--signal-cyan);
+  font-weight: 700;
+}
+
+.route-sep {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+/* Physical Capacity Gauge */
+.capacity-gauge-block {
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  border-radius: 4px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.gauge-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.gauge-label-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gauge-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.gauge-sub {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.gauge-val {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-white);
+}
+
+.gauge-meter-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-obsidian);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.gauge-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--signal-cyan), var(--signal-amber));
+  border-radius: 2px;
+  transition: width var(--transition-normal);
+}
+
+.gauge-footer {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+.gauge-footer strong {
+  color: var(--signal-cyan);
+}
+
+.gauge-status-note {
+  color: var(--text-muted);
+}
+
+/* Dossier Ledger (Right Side) */
+.dossier-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+.telemetry-tier {
+  display: grid;
+  gap: 10px;
+}
+
+.primary-tier {
+  grid-template-columns: 1fr 1fr;
+}
+
+.secondary-tier {
+  grid-template-columns: 1fr 1fr;
+}
+
+.telemetry-cell {
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  border-radius: 4px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cell-historical {
+  border-left: 3px solid var(--signal-cyan);
+}
+
+.cell-forecast {
+  border-left: 3px solid var(--signal-amber);
+}
+
+.cell-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cell-kpi-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.cell-primary-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-white);
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+}
+
+.cell-primary-value.hist-val {
+  color: var(--signal-cyan);
+}
+
+.cell-primary-value.pred-val {
+  color: var(--signal-amber);
+}
+
+.cell-sub-metrics {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.sub-metric-item {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.sub-metric-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--signal-cyan);
+  background: var(--signal-cyan-dim);
+  padding: 1px 5px;
+  border-radius: 2px;
+  letter-spacing: 0.4px;
+}
+
+.sub-metric-badge.accent {
+  color: var(--signal-amber);
+  background: var(--signal-amber-dim);
+}
+
+.cell-secondary-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-white);
+}
+
+.cell-secondary-value.highlight-num {
+  color: var(--signal-amber);
+}
+
+.cell-sub-text {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   SECTION B: SUBMISSION MODEL SELECTOR RACK
+   ========================================================================== */
+.model-rack-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-deck);
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.rack-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rack-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--signal-amber);
+  background: var(--signal-amber-dim);
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+.rack-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-white);
+  letter-spacing: 0.5px;
+}
+
+.rack-presets {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.preset-pill {
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  color: var(--text-dim);
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.preset-pill:hover {
+  border-color: var(--signal-amber);
+  color: var(--signal-amber);
+}
+
+.preset-pill.active {
+  background: var(--signal-amber);
+  border-color: var(--signal-amber);
+  color: var(--bg-obsidian);
+  font-weight: 800;
+}
+
+.preset-pill:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.rack-checkboxes-deck {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sub-pill-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  padding: 4px 9px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  user-select: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.sub-pill-label:hover {
+  border-color: var(--signal-amber-border);
+  color: var(--text-white);
+  transform: translateY(-1px);
+}
+
+.sub-pill-label input[type="checkbox"] {
+  accent-color: var(--signal-amber);
+  cursor: pointer;
+}
+
+.sub-pill-label.checked {
+  background: var(--signal-amber-dim);
+  border-color: var(--signal-amber);
+  color: var(--signal-amber);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   SECTION C: TELEMETRY CHART STATION
+   ========================================================================== */
+.chart-station-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-deck);
+  border-radius: 6px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.station-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-deck);
+}
+
+.analysis-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-obsidian);
+  padding: 3px;
+  border-radius: 4px;
+  border: 1px solid var(--border-deck);
+}
+
+.tab-pill {
+  background: transparent;
+  color: var(--text-dim);
+  border: none;
+  padding: 6px 11px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.tab-indicator {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.tab-pill:hover {
+  color: var(--text-white);
+  background: var(--bg-hover);
+}
+
+.tab-pill.active {
+  background: var(--signal-cyan);
+  color: var(--bg-obsidian);
+  font-weight: 800;
+}
+
+.tab-pill:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-caption {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.segmented-control {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--bg-obsidian);
+  padding: 2px;
+  border-radius: 4px;
+  border: 1px solid var(--border-deck);
+}
+
+.range-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.range-btn:hover {
+  color: var(--text-white);
+}
+
+.range-btn.active {
+  background: var(--bg-deck-elevated);
+  color: var(--signal-cyan);
+  font-weight: 700;
+}
+
+.range-btn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.toggle-pill {
+  background: var(--bg-obsidian);
+  border: 1px solid var(--border-deck);
+  color: var(--text-dim);
+  padding: 4px 9px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.toggle-pill.active {
+  border-color: var(--signal-cyan-border);
+  color: var(--signal-cyan);
+  background: var(--signal-cyan-dim);
+}
+
+.toggle-pill:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.chart-canvas-wrapper {
+  position: relative;
+  height: 420px;
+  width: 100%;
+  background: var(--bg-obsidian);
+  border: 1px solid var(--border-deck);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.custom-legend-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-silver);
+}
+
+.legend-line {
+  width: 16px;
+  height: 3px;
+  border-radius: 1px;
+}
+
+/* ==========================================================================
+   SECTION D: DAILY TELEMETRY LEDGER DATA MATRIX
+   ========================================================================== */
+.ledger-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-deck);
+  border-radius: 6px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ledger-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ledger-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-white);
+  letter-spacing: 0.5px;
+}
+
+.ledger-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  background: var(--bg-deck);
+  border: 1px solid var(--border-deck);
+  color: var(--signal-cyan);
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.action-btn:hover {
+  background: var(--signal-cyan);
+  color: var(--bg-obsidian);
+  border-color: var(--signal-cyan);
+}
+
+.action-btn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.ledger-table-container {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--border-deck);
+  border-radius: 4px;
+  background: var(--bg-obsidian);
+}
+
+.telemetry-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.telemetry-table th {
+  background: var(--bg-surface);
+  border-bottom: 2px solid var(--border-deck);
+  padding: 8px 12px;
+  text-align: right;
+  font-weight: 700;
+  color: var(--text-dim);
+  font-size: 9.5px;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.telemetry-table th:first-child, .telemetry-table th:nth-child(2) {
+  text-align: left;
+}
+
+.telemetry-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: right;
+  color: var(--text-silver);
+}
+
+.telemetry-table td:first-child, .telemetry-table td:nth-child(2) {
+  text-align: left;
+}
+
+.telemetry-table tr:hover td {
+  background: var(--bg-hover);
+  color: var(--text-white);
+}
+
+.table-empty-notice {
+  text-align: center !important;
+  padding: 28px !important;
+  color: var(--text-muted) !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS (Maintains Asymmetric Balance)
+   ========================================================================== */
+@media (max-width: 1200px) {
+  .command-dossier {
+    grid-template-columns: 1fr;
+  }
+  .dossier-anchor {
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-right: 0;
+    padding-bottom: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-dock {
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--border-deck);
+  }
+  .filter-panel {
+    max-height: none;
+  }
+  .trafo-scroll-registry {
+    max-height: 240px;
+  }
+  .primary-tier, .secondary-tier {
+    grid-template-columns: 1fr;
+  }
+  .station-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

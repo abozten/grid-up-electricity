@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------- raw data
+# Competition data and EPIAS extracts. Never tracked: licensed, and large.
+/data/*.csv
+/data/*.db
+/data/*.sqlite*
+/data/epias-data/
+/data/kgup/
+/data/not-used-izmir-manisa-epias/
+/data/yuk-tahmin-plani/
+
+# --------------------------------------------------- generated model output
+# outputs/ holds small JSON experiment ledgers. Everything a run regenerates is not.
+*.csv
+*.npy
+*.npz
+*.pkl
+*.log
+*.txt
+outputs/*.log
+outputs/*.txt
+outputs/*.csv
+outputs/ag_*/
+outputs/cache/
+outputs/transformer_load_types.json
+outputs/transformer_load_classification.csv
+
+# ------------------------------------------------------ experiment tracking
+# MLflow's store is a local cache of runs, reproducible from the scripts.
+mlruns/
+mlflow.db
+catboost_info/
+
+# ------------------------------------------------------------------- python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.venv*/
+
+# ---------------------------------------------------------------------- os
+.DS_Store
+*.swp
+*.swo
+
+# ------------------------------------------------------------------ secrets
+.env*
+!.env.example
+

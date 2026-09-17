@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grid-Up Electricity // Transformer Telemetry Explorer</title>
+  
+  <!-- Curated Font Pairing: Space Grotesk (Display), JetBrains Mono (Data/Code), Plus Jakarta Sans (UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/static/styles.css">
+  <!-- Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Industrial Dispatch Header -->
+  <header class="app-header">
+    <div class="header-brand-block">
+      <div class="station-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-eyebrow">
+          <span>SYS // DISPATCH TELEMETRY</span>
+          <span class="coord-divider">/</span>
+          <span class="region-tag">İZMİR &amp; MANİSA GRID</span>
+        </div>
+        <h1 class="app-title">GRID-UP <span class="title-accent">TRAFO EXPLORER</span></h1>
+      </div>
+    </div>
+
+    <div class="header-telemetry-array">
+      <div class="telemetry-badge">
+        <span class="telemetry-key">NETWORK FLEET</span>
+        <span class="telemetry-val" id="globalTrafoCount">7,368 Trafos</span>
+      </div>
+      <div class="telemetry-badge active-model">
+        <span class="telemetry-key">ACTIVE FORECAST</span>
+        <span class="telemetry-val" id="activeModelPill">★ v33 Active PB</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Asymmetric Workspace Layout -->
+  <div class="app-layout">
+    <!-- Left Tactical Dock: Search & Transformer Registry -->
+    <aside class="sidebar-dock" aria-label="Transformer Filter and Registry">
+      <!-- Filter HUD Section -->
+      <section class="dock-panel filter-panel">
+        <div class="panel-header">
+          <span class="panel-tag">01 // REGISTRY FILTER</span>
+          <span class="panel-sub">DISPATCH HUD</span>
+        </div>
+        
+        <!-- Search Input -->
+        <div class="control-group">
+          <label for="searchInput" class="control-label">SEARCH BY ID OR SUBSTATION</label>
+          <div class="input-container">
+            <input type="text" id="searchInput" placeholder="e.g. 70122340, BORNOVA, ALİAĞA..." autocomplete="off" spellcheck="false">
+            <span class="input-focus-line"></span>
+          </div>
+        </div>
+
+        <!-- Geographic Controls Matrix -->
+        <div class="geo-controls-grid">
+          <div class="control-group">
+            <label for="ilSelect" class="control-label">PROVINCE (İL)</label>
+            <div class="select-container">
+              <select id="ilSelect">
+                <option value="All">Tüm İller (İzmir &amp; Manisa)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="ilceSelect" class="control-label">DISTRICT (İLÇE)</label>
+            <div class="select-container">
+              <select id="ilceSelect">
+                <option value="All">Tüm İlçeler (47 İlçe)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bölge Filter -->
+        <div class="control-group">
+          <label for="bolgeSelect" class="control-label">REGION / DISTRIBUTION (BÖLGE)</label>
+          <div class="select-container">
+            <select id="bolgeSelect">
+              <option value="All">Tüm Bölgeler</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Status Segmented Rocker Switch -->
+        <div class="control-group">
+          <label class="control-label">TRANSFORMER STATUS</label>
+          <div class="status-buttons" role="group" aria-label="Transformer Status Filter">
+            <button class="filter-btn active" data-status="All">All</button>
+            <button class="filter-btn" data-status="Seen">Seen (5k)</button>
+            <button class="filter-btn" data-status="Cold Start">Cold Start (2k)</button>
+            <button class="filter-btn" data-status="Train Only">Train Only</button>
+          </div>
+        </div>
+
+        <!-- Sort Control -->
+        <div class="control-group">
+          <label for="sortSelect" class="control-label">SORT REGISTRY ORDER</label>
+          <div class="select-container">
+            <select id="sortSelect">
+              <option value="train_mean:desc">Highest Historical Mean</option>
+              <option value="pred_mean:desc">Highest 2026 Forecast Mean</option>
+              <option value="guc:desc">Highest Power Rating (Güç)</option>
+              <option value="yoy_pct:desc">Highest YoY Growth %</option>
+              <option value="tanim:asc">Transformer ID (A-Z)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Transformer List Registry -->
+      <section class="dock-panel registry-panel">
+        <div class="registry-toolbar">
+          <div class="registry-count-wrap">
+            <span class="panel-tag">02 // UNITS</span>
+            <span class="count-display" id="trafoCountText">Transformers (0)</span>
+          </div>
+          <div class="registry-nav-actions">
+            <button id="btnRandom" class="tactile-btn random-btn" title="Pick Random Transformer" aria-label="Random Transformer">
+              <span class="btn-icon">⚡</span>
+              <span>RND</span>
+            </button>
+            <button id="btnPrev" class="tactile-btn nav-btn" title="Previous Transformer" aria-label="Previous Transformer">◀</button>
+            <button id="btnNext" class="tactile-btn nav-btn" title="Next Transformer" aria-label="Next Transformer">▶</button>
+          </div>
+        </div>
+
+        <div class="trafo-scroll-registry" id="trafoList" tabindex="0" role="listbox" aria-label="Transformer List">
+          <div class="loading-spinner">Querying dispatch database...</div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="main-viewport" id="mainContent">
+      <!-- Section A: Asymmetric Hero Command Dossier -->
+      <section class="command-dossier" id="trafoProfile" aria-label="Transformer Telemetry Profile">
+        <!-- Visual Anchor Left: Identity & Geographic Routing -->
+        <div class="dossier-anchor">
+          <div class="dossier-header-row">
+            <span class="status-ribbon" id="trafoStatusBadge">SEEN // TRAIN &amp; TEST</span>
+            <span class="dossier-tag">UNIT TELEMETRY DOSSIER</span>
+          </div>
+
+          <h2 class="trafo-id-display" id="displayTanim">--------</h2>
+          
+          <div class="dossier-route-path" id="displayLocation">
+            <span class="route-node">İZMİR</span>
+            <span class="route-sep">›</span>
+            <span class="route-node">METROPOL</span>
+            <span class="route-sep">›</span>
+            <span class="route-node highlight">BORNOVA</span>
+          </div>
+
+          <!-- Physical Capacity Gauge -->
+          <div class="capacity-gauge-block">
+            <div class="gauge-meta">
+              <div class="gauge-label-col">
+                <span class="gauge-title">RATED CAPACITY (GÜÇ)</span>
+                <span class="gauge-sub">PHYSICAL TRANSFORMER RATING</span>
+              </div>
+              <div class="gauge-val" id="displayGuc">- kVA</div>
+            </div>
+            <div class="gauge-meter-track">
+              <div class="gauge-meter-fill" id="gaugeMeterFill" style="width: 65%;"></div>
+            </div>
+            <div class="gauge-footer">
+              <span>TRAIN DEPTH: <strong id="displayTrainDays">- days</strong></span>
+              <span class="gauge-status-note">NOMINAL BASELINE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Ledger Right: Dual-Tier Telemetry Matrix -->
+        <div class="dossier-ledger">
+          <!-- Primary Comparison Tier -->
+          <div class="telemetry-tier primary-tier">
+            <!-- Historical Baseline Card -->
+            <div class="telemetry-cell cell-historical">
+              <div class="cell-head">
+                <span class="cell-kpi-label">HISTORICAL BASELINE MEAN</span>
+              </div>
+              <div class="cell-primary-value hist-val" id="valHistMean">- kWh/d</div>
+              <div class="cell-sub-metrics">
+                <span class="sub-metric-item" id="valHistMax">Peak: - kWh</span>
+                <span class="sub-metric-badge">2025 ACTUAL</span>
+              </div>
+            </div>
+
+            <!-- 2026 Forecast Card -->
+            <div class="telemetry-cell cell-forecast">
+              <div class="cell-head">
+                <span class="cell-kpi-label" id="labelPredMean">2026 FORECAST MEAN (v33)</span>
+              </div>
+              <div class="cell-primary-value pred-val" id="valPredMean">- kWh/d</div>
+              <div class="cell-sub-metrics">
+                <span class="sub-metric-item" id="valPredMax">Peak: - kWh</span>
+                <span class="sub-metric-badge accent">MODEL ESTIMATE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secondary Summary Tier -->
+          <div class="telemetry-tier secondary-tier">
+            <!-- YoY Summer Variance -->
+            <div class="telemetry-cell cell-secondary">
+              <div class="cell-head">
+                <span class="cell-kpi-label">YOY SUMMER VARIANCE</span>
+              </div>
+              <div class="cell-secondary-value" id="valYoYPct">-%</div>
+              <div class="cell-sub-text">Summer '26 vs Summer '25 Delta</div>
+            </div>
+
+            <!-- 4-Month Forecast Volume -->
+            <div class="telemetry-cell cell-secondary">
+              <div class="cell-head">
+                <span class="cell-kpi-label">4-MONTH FORECAST SUM</span>
+              </div>
+              <div class="cell-secondary-value highlight-num" id="valPredSum">- MWh</div>
+              <div class="cell-sub-text">122 Days Cumulative Horizon</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section B: Submission Model Selector Rack -->
+      <section class="model-rack-panel" aria-label="Submission Model Comparison">
+        <div class="rack-header">
+          <div class="rack-title-group">
+            <span class="rack-tag">SUBMISSION ENGINE</span>
+            <h3 class="rack-title">COMPARE FORECAST MODELS</h3>
+          </div>
+          <div class="rack-presets" role="group" aria-label="Preset model configurations">
+            <button class="preset-pill" id="presetActive">★ Active v33 Only</button>
+            <button class="preset-pill active" id="presetTop3">⚡ Top 3 (v33, v24, v22)</button>
+            <button class="preset-pill" id="presetColdTrio">🎯 Cold-Start Trio</button>
+            <button class="preset-pill" id="presetAll">📊 All Models (15)</button>
+          </div>
+        </div>
+
+        <div class="rack-checkboxes-deck" id="submissionCheckboxes">
+          <!-- Dynamically populated checkboxes -->
+        </div>
+      </section>
+
+      <!-- Section C: High-Precision Telemetry Chart Station -->
+      <section class="chart-station-panel" aria-label="Telemetry Chart Viewport">
+        <!-- Precision Chart Toolbar -->
+        <div class="station-toolbar">
+          <!-- Analysis Mode Tabs -->
+          <nav class="analysis-tabs" role="tablist" aria-label="Chart views">
+            <button class="tab-pill active" data-tab="timeline" role="tab" aria-selected="true">
+              <span>CONTINUOUS TIMELINE</span>
+            </button>
+            <button class="tab-pill" data-tab="yoy" role="tab" aria-selected="false">
+              <span>YOY SUMMER OVERLAY</span>
+            </button>
+            <button class="tab-pill" data-tab="monthly" role="tab" aria-selected="false">
+              <span>MONTHLY MATRIX</span>
+            </button>
+            <button class="tab-pill" data-tab="district" role="tab" aria-selected="false">
+              <span>DISTRICT AGGREGATE</span>
+            </button>
+          </nav>
+
+          <!-- Timeline Range Selectors -->
+          <div class="toolbar-actions" id="timelineRangeControls">
+            <span class="filter-caption">RANGE:</span>
+            <div class="segmented-control">
+              <button class="range-btn active" data-range="all">ALL (19 MO)</button>
+              <button class="range-btn" data-range="last6m">LAST 6 MO + FC</button>
+              <button class="range-btn" data-range="forecast">FORECAST ONLY</button>
+            </div>
+          </div>
+
+          <!-- District View Modes -->
+          <div class="toolbar-actions" id="districtViewControls" style="display: none;">
+            <span class="filter-caption">DISTRICT:</span>
+            <div class="segmented-control">
+              <button class="range-btn active" data-district-view="total" title="Sum total consumption across all reporting transformers in the district">TOTAL MWh</button>
+              <button class="range-btn" data-district-view="avg" title="Daily average consumption per transformer">AVG / TRAFO</button>
+              <button class="range-btn" data-district-view="seen_total" title="Total consumption of constant fleet (seen in train only)">SEEN TOTAL</button>
+              <button class="range-btn" data-district-view="seen_avg" title="Daily average of constant fleet">SEEN AVG</button>
+            </div>
+            <button class="toggle-pill active" id="toggleTrafoCount" data-active="true">TRAFOS: ON</button>
+          </div>
+
+          <!-- Global Temperature Toggle -->
+          <div class="toolbar-actions">
+            <button class="toggle-pill active" id="toggleTempBtn" data-active="true" title="Toggle temperature overlay line across all charts">
+              <span>TEMP (°C): ON</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Canvas Viewport -->
+        <div class="chart-canvas-wrapper">
+          <canvas id="mainChart"></canvas>
+        </div>
+
+        <!-- Custom Telemetry Legend Strip -->
+        <div class="custom-legend-strip" id="customLegend" aria-label="Chart series legend">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- Section D: Daily Telemetry Ledger Data Table -->
+      <section class="ledger-panel" aria-label="Daily Telemetry Comparison Table">
+        <div class="ledger-header">
+          <div class="ledger-title-wrap">
+            <span class="panel-tag">03 // DAILY MATRIX</span>
+            <h3 class="ledger-title">DAILY TELEMETRY COMPARISON</h3>
+          </div>
+          <div class="ledger-actions">
+            <button class="action-btn" id="btnExportCsv">
+              <span class="btn-icon">📥</span>
+              <span>EXPORT CSV</span>
+            </button>
+            <button class="action-btn" id="btnExportJson">
+              <span class="btn-icon">📥</span>
+              <span>EXPORT JSON</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="ledger-table-container">
+          <table class="telemetry-table" id="comparisonTable">
+            <thead>
+              <tr id="tableHeadRow">
+                <th>DATE (DAY)</th>
+                <th>TYPE</th>
+                <th>TEMP (°C)</th>
+                <th>HISTORICAL (kWh)</th>
+                <th>v33 ACTIVE (kWh)</th>
+                <th>v24 (kWh)</th>
+                <th>v22 (kWh)</th>
+                <th>DELTA VS HIST</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="8" class="table-empty-notice">Select a transformer from the registry to view daily telemetry records.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
